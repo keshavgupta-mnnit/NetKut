@@ -37,6 +37,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kglabs28.netkut.vpn.NetCutVpnService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,40 +92,75 @@ fun MainScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("NetKut") },
-                actions = {
-                    IconButton(onClick = {
-                        coroutineScope.launch {
-                            viewModel.setShowSyncDialog(true)
-                            delay(2000)
-                            viewModel.setShowSyncDialog(false)
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF0F1E36),
+            Color(0xFF050B14)
+        )
+    )
+
+    Box(modifier = Modifier.fillMaxSize().background(backgroundGradient)) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = { Text("NetKut") },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    ),
+                    actions = {
+                        IconButton(onClick = {
+                            coroutineScope.launch {
+                                viewModel.setShowSyncDialog(true)
+                                delay(2000)
+                                viewModel.setShowSyncDialog(false)
+                            }
+                        }) {
+                            Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
                         }
-                    }) {
-                        Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
+                    }
+                )
+            },
+            bottomBar = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    HorizontalDivider(
+                        modifier = Modifier.fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = Color.White.copy(alpha = 0.1f)
+                    )
+                    NavigationBar(
+                        containerColor = Color.Transparent
+                    ) {
+                        NavigationBarItem(
+                            selected = uiState.selectedTab == AppTab.SELECTED_APPS,
+                            onClick = { viewModel.setTab(AppTab.SELECTED_APPS) },
+                            icon = { Icon(Icons.Default.Security, contentDescription = "Selected Apps") },
+                            label = { Text("Selected Apps") },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = Color.Transparent,
+                                selectedIconColor = Color(0xFF3B95FF),
+                                selectedTextColor = Color(0xFF3B95FF),
+                                unselectedIconColor = Color(0xFF8B9CB5),
+                                unselectedTextColor = Color(0xFF8B9CB5)
+                            )
+                        )
+                        NavigationBarItem(
+                            selected = uiState.selectedTab == AppTab.ALL_APPS,
+                            onClick = { viewModel.setTab(AppTab.ALL_APPS) },
+                            icon = { Icon(Icons.Default.Apps, contentDescription = "All Apps") },
+                            label = { Text("All Apps") },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = Color.Transparent,
+                                selectedIconColor = Color(0xFF3B95FF),
+                                selectedTextColor = Color(0xFF3B95FF),
+                                unselectedIconColor = Color(0xFF8B9CB5),
+                                unselectedTextColor = Color(0xFF8B9CB5)
+                            )
+                        )
                     }
                 }
-            )
-        },
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = uiState.selectedTab == AppTab.SELECTED_APPS,
-                    onClick = { viewModel.setTab(AppTab.SELECTED_APPS) },
-                    icon = { Icon(Icons.Default.Security, contentDescription = "Selected Apps") },
-                    label = { Text("Selected Apps") }
-                )
-                NavigationBarItem(
-                    selected = uiState.selectedTab == AppTab.ALL_APPS,
-                    onClick = { viewModel.setTab(AppTab.ALL_APPS) },
-                    icon = { Icon(Icons.Default.Apps, contentDescription = "All Apps") },
-                    label = { Text("All Apps") }
-                )
             }
-        }
-    ) { innerPadding ->
+        ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -132,6 +171,7 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer
                     )
@@ -172,6 +212,7 @@ fun MainScreen(
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 placeholder = { Text("Search apps") },
                 singleLine = true,
+                shape = RoundedCornerShape(24.dp),
                 leadingIcon = {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
                 },
@@ -262,6 +303,7 @@ fun MainScreen(
         }
     }
 }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -293,7 +335,8 @@ fun CategoryDropdown(
             readOnly = true,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor(),
-            singleLine = true
+            singleLine = true,
+            shape = RoundedCornerShape(24.dp)
         )
         ExposedDropdownMenu(
             expanded = expanded,
@@ -350,7 +393,11 @@ fun AppItemRow(
     onToggle: (Boolean) -> Unit
 ) {
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = Color(0xFF162339)
+        )
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

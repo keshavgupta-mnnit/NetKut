@@ -27,7 +27,7 @@ data class MainUiState(
     val apps: List<AppItemUiState> = emptyList(),
     val searchQuery: String = "",
     val isLoading: Boolean = true,
-    val selectedTab: AppTab = AppTab.ALL_APPS,
+    val selectedTab: AppTab = AppTab.SELECTED_APPS,
     val showSystemApps: Boolean = false,
     val selectedCategory: Int? = null,
     val showSyncDialog: Boolean = false
@@ -41,7 +41,7 @@ class MainViewModel(
     private val _searchQuery = MutableStateFlow("")
     private val _installedApps = MutableStateFlow<List<AppInfo>>(emptyList())
     private val _isLoading = MutableStateFlow(true)
-    private val _selectedTab = MutableStateFlow(AppTab.ALL_APPS)
+    private val _selectedTab = MutableStateFlow(AppTab.SELECTED_APPS)
     private val _showSystemApps = MutableStateFlow(false)
     private val _selectedCategory = MutableStateFlow<Int?>(null)
     private val _showSyncDialog = MutableStateFlow(false)
