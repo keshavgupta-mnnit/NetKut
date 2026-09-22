@@ -13,7 +13,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,11 +26,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import android.os.PowerManager
+import android.provider.Settings
+import android.net.Uri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kglabs28.netkut.vpn.NetCutVpnService
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +45,11 @@ fun MainScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    
+    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+    val isIgnoringBatteryOptimizations = pm.isIgnoringBatteryOptimizations(context.packageName)
+    var showBatteryBanner by remember { mutableStateOf(!isIgnoringBatteryOptimizations) }
     
     val vpnLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -44,7 +60,6 @@ fun MainScreen(
     }
 
     val onToggleApp = { packageName: String, blocked: Boolean ->
-        // If we are blocking an app, make sure VPN is prepared/started
         if (blocked) {
             val vpnIntent = VpnService.prepare(context)
             if (vpnIntent != null) {
@@ -56,11 +71,55 @@ fun MainScreen(
         viewModel.toggleAppBlocked(packageName, blocked)
     }
 
+    if (uiState.showSyncDialog) {
+        AlertDialog(
+            onDismissRequest = { },
+            confirmButton = { },
+            title = { Text("Syncing...") },
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator()
+                    Text("Refreshing app list and settings")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("NetKut") }
+                title = { Text("NetKut") },
+                actions = {
+                    IconButton(onClick = {
+                        coroutineScope.launch {
+                            viewModel.setShowSyncDialog(true)
+                            delay(2000)
+                            viewModel.setShowSyncDialog(false)
+                        }
+                    }) {
+                        Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
+                    }
+                }
             )
+        },
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    selected = uiState.selectedTab == AppTab.SELECTED_APPS,
+                    onClick = { viewModel.setTab(AppTab.SELECTED_APPS) },
+                    icon = { Icon(Icons.Default.Security, contentDescription = "Selected Apps") },
+                    label = { Text("Selected Apps") }
+                )
+                NavigationBarItem(
+                    selected = uiState.selectedTab == AppTab.ALL_APPS,
+                    onClick = { viewModel.setTab(AppTab.ALL_APPS) },
+                    icon = { Icon(Icons.Default.Apps, contentDescription = "All Apps") },
+                    label = { Text("All Apps") }
+                )
+            }
         }
     ) { innerPadding ->
         Column(
@@ -68,6 +127,43 @@ fun MainScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
+            if (showBatteryBanner) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Battery optimization may stop the VPN from running in the background.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                                    data = Uri.parse("package:${context.packageName}")
+                                }
+                                context.startActivity(intent)
+                                showBatteryBanner = false
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.onErrorContainer,
+                                contentColor = MaterialTheme.colorScheme.errorContainer
+                            )
+                        ) {
+                            Text("Fix Now")
+                        }
+                    }
+                }
+            }
+
             OutlinedTextField(
                 value = uiState.searchQuery,
                 onValueChange = { viewModel.updateSearchQuery(it) },
@@ -77,23 +173,139 @@ fun MainScreen(
                 placeholder = { Text("Search apps") },
                 singleLine = true,
                 leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search"
-                    )
+                    Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                },
+                trailingIcon = {
+                    if (uiState.searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.updateSearchQuery("") }) {
+                            Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear search")
+                        }
+                    }
                 }
             )
+
+            if (uiState.selectedTab == AppTab.ALL_APPS) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    CategoryDropdown(
+                        modifier = Modifier.weight(1f),
+                        selectedCategory = uiState.selectedCategory,
+                        onCategorySelected = { viewModel.setCategory(it) }
+                    )
+                    
+                    Spacer(modifier = Modifier.width(16.dp))
+                    
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("System apps", style = MaterialTheme.typography.bodyMedium)
+                        Spacer(Modifier.width(8.dp))
+                        Switch(
+                            checked = uiState.showSystemApps,
+                            onCheckedChange = { viewModel.toggleSystemApps(it) }
+                        )
+                    }
+                }
+            } else if (uiState.selectedTab == AppTab.SELECTED_APPS) {
+                if (uiState.apps.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(onClick = { viewModel.clearAllBlockedApps() }) {
+                            Text("Clear All")
+                        }
+                    }
+                }
+            }
 
             if (uiState.isLoading) {
                 Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             } else {
-                AppListAdaptive(
-                    modifier = Modifier.weight(1f),
-                    apps = uiState.apps,
-                    searchQuery = uiState.searchQuery,
-                    onToggle = onToggleApp
+                if (uiState.selectedTab == AppTab.SELECTED_APPS && uiState.apps.isEmpty()) {
+                    Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                "No apps selected yet",
+                                style = MaterialTheme.typography.titleMedium,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            Button(onClick = { viewModel.setTab(AppTab.ALL_APPS) }) {
+                                Text("Go to All Apps")
+                            }
+                        }
+                    }
+                } else {
+                    AppListAdaptive(
+                        modifier = Modifier.weight(1f),
+                        apps = uiState.apps,
+                        searchQuery = uiState.searchQuery,
+                        onToggle = onToggleApp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoryDropdown(
+    modifier: Modifier = Modifier,
+    selectedCategory: Int?,
+    onCategorySelected: (Int?) -> Unit
+) {
+    val categories = listOf(
+        null to "All",
+        0 to "Games",
+        4 to "Social",
+        2 to "Video",
+        1 to "Audio",
+        7 to "Product"
+    )
+
+    var expanded by remember { mutableStateOf(false) }
+    val selectedText = categories.find { it.first == selectedCategory }?.second ?: "All"
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = selectedText,
+            onValueChange = {},
+            readOnly = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor(),
+            singleLine = true
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            categories.forEach { (categoryInt, label) ->
+                DropdownMenuItem(
+                    text = { Text(label) },
+                    onClick = {
+                        onCategorySelected(categoryInt)
+                        expanded = false
+                    }
                 )
             }
         }

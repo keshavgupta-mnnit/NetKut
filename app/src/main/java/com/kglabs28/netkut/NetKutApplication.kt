@@ -1,6 +1,11 @@
 package com.kglabs28.netkut
 
 import android.app.Application
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.kglabs28.netkut.worker.VpnSyncWorker
+import java.util.concurrent.TimeUnit
 import com.kglabs28.netkut.data.repository.AppRepositoryImpl
 import com.kglabs28.netkut.data.repository.BlocklistRepositoryImpl
 import com.kglabs28.netkut.domain.repository.AppRepository
@@ -28,5 +33,17 @@ class NetKutApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = DefaultAppContainer(this)
+        
+        setupWorkManager()
+    }
+
+    private fun setupWorkManager() {
+        val syncRequest = PeriodicWorkRequestBuilder<VpnSyncWorker>(15, TimeUnit.MINUTES)
+            .build()
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "VpnSyncWorker",
+            ExistingPeriodicWorkPolicy.KEEP,
+            syncRequest
+        )
     }
 }
