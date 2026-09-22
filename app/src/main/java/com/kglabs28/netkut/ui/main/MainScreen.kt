@@ -61,6 +61,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kglabs28.netkut.ui.components.AppListAdaptive
 import com.kglabs28.netkut.ui.components.BatteryOptimizationBanner
 import com.kglabs28.netkut.ui.components.CategoryDropdown
+import com.kglabs28.netkut.ui.components.EmptySelectedApps
 import com.kglabs28.netkut.ui.components.SearchBar
 import com.kglabs28.netkut.ui.components.SyncDialog
 import com.kglabs28.netkut.ui.theme.AccentBlue
@@ -109,7 +110,7 @@ fun MainScreen(
     }
 
     if (uiState.showSyncDialog) {
-        SyncDialog()
+        SyncDialog(onDismiss = { viewModel.setShowSyncDialog(false) })
     }
 
     val backgroundGradient = Brush.verticalGradient(
@@ -270,26 +271,10 @@ fun MainScreen(
                     }
                 } else {
                     if (uiState.selectedTab == AppTab.SELECTED_APPS && uiState.apps.isEmpty()) {
-                        Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(Dimens.IconSizeLarge),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(Modifier.height(Dimens.SpacingLarge))
-                                Text(
-                                    Strings.NoAppsSelected,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(Modifier.height(Dimens.SpacingLarge))
-                                Button(onClick = { viewModel.setTab(AppTab.ALL_APPS) }) {
-                                    Text(Strings.GoToAllApps)
-                                }
-                            }
-                        }
+                        EmptySelectedApps(
+                            onGoToAllApps = { viewModel.setTab(AppTab.ALL_APPS) },
+                            modifier = Modifier.weight(1f)
+                        )
                     } else {
                         AppListAdaptive(
                             modifier = Modifier.weight(1f),
