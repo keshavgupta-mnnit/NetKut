@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.kglabs28.netkut.domain.model.AppInfo
 import com.kglabs28.netkut.domain.repository.AppRepository
 import com.kglabs28.netkut.domain.repository.BlocklistRepository
+import com.kglabs28.netkut.util.AppFilterUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -60,19 +61,14 @@ class MainViewModel(
             FilterState(tab, showSystemApps, selectedCategory, showSyncDialog)
         }
     ) { apps, searchQuery, blockedPackages, isLoading, filterState ->
-        val filteredApps = apps.filter { app ->
-            val matchSystem = if (filterState.showSystemApps) true else !app.isSystemApp
-            val matchSearch = searchQuery.isBlank() || app.appName.contains(searchQuery, ignoreCase = true)
-            val matchCategory = filterState.selectedCategory == null || app.category == filterState.selectedCategory
-            val matchTab = if (filterState.tab == AppTab.SELECTED_APPS) blockedPackages.contains(app.packageName) else true
-            
-            matchSystem && matchSearch && matchCategory && matchTab
-        }.map { app ->
-            AppItemUiState(
-                appInfo = app,
-                isBlocked = blockedPackages.contains(app.packageName)
-            )
-        }
+        val filteredApps = AppFilterUtils.filterApps(
+            apps = apps,
+            searchQuery = searchQuery,
+            blockedPackages = blockedPackages,
+            showSystemApps = filterState.showSystemApps,
+            selectedCategory = filterState.selectedCategory,
+            tab = filterState.tab
+        )
         
         MainUiState(
             apps = filteredApps,

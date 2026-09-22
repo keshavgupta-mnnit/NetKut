@@ -12,13 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -36,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.kglabs28.netkut.ui.theme.AccentBlue
 import com.kglabs28.netkut.ui.theme.Dimens
 import com.kglabs28.netkut.ui.theme.FocusedBorderColor
@@ -44,6 +37,7 @@ import com.kglabs28.netkut.ui.theme.InputBackground
 import com.kglabs28.netkut.ui.theme.Strings
 import com.kglabs28.netkut.ui.theme.TextMutedBlue
 import com.kglabs28.netkut.ui.theme.UnfocusedBorderColor
+import com.kglabs28.netkut.util.AppUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,17 +46,8 @@ fun CategoryDropdown(
     selectedCategory: Int?,
     onCategorySelected: (Int?) -> Unit
 ) {
-    val categories = listOf(
-        Triple(null, Strings.AllCategories, Icons.Default.Apps),
-        Triple(0, Strings.CategoryGames, Icons.Default.SportsEsports),
-        Triple(4, Strings.CategorySocial, Icons.Default.People),
-        Triple(2, Strings.CategoryVideo, Icons.Default.Movie),
-        Triple(1, Strings.CategoryAudio, Icons.Default.MusicNote),
-        Triple(7, Strings.CategoryProduct, Icons.Default.ShoppingBag)
-    )
-
+    val selectedItem = AppUtils.getCategoryItem(selectedCategory)
     var expanded by remember { mutableStateOf(false) }
-    val selectedItem = categories.find { it.first == selectedCategory } ?: categories.first()
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -73,15 +58,15 @@ fun CategoryDropdown(
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth()
-                .height(38.dp),
+                .height(Dimens.DropdownHeight),
             shape = RoundedCornerShape(Dimens.RadiusLarge),
             color = InputBackground,
-            border = BorderStroke(1.dp, if (expanded) FocusedBorderColor else UnfocusedBorderColor)
+            border = BorderStroke(Dimens.DividerThickness, if (expanded) FocusedBorderColor else UnfocusedBorderColor)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 12.dp),
+                    .padding(horizontal = Dimens.PaddingMedium),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -90,14 +75,14 @@ fun CategoryDropdown(
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(
-                        imageVector = selectedItem.third,
+                        imageVector = selectedItem.icon,
                         contentDescription = null,
                         tint = TextMutedBlue,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(Dimens.RadiusMedium + Dimens.PaddingTiny)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(Dimens.SpacingMedium))
                     Text(
-                        text = selectedItem.second,
+                        text = selectedItem.label,
                         style = TextStyle(fontSize = Dimens.FontSizeMedium, color = Color.White),
                         maxLines = 1
                     )
@@ -112,15 +97,15 @@ fun CategoryDropdown(
             shape = RoundedCornerShape(Dimens.RadiusMedium),
             containerColor = InputBackground
         ) {
-            categories.forEach { (categoryInt, label, icon) ->
-                val isSelected = categoryInt == selectedCategory
+            AppUtils.categories.forEach { item ->
+                val isSelected = item.id == selectedCategory
                 val itemTextColor = if (isSelected) AccentBlue else Color.White
                 val itemIconColor = if (isSelected) AccentBlue else TextMutedBlue
 
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = label,
+                            text = item.label,
                             color = itemTextColor,
                             fontSize = Dimens.FontSizeMedium,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
@@ -128,7 +113,7 @@ fun CategoryDropdown(
                     },
                     leadingIcon = {
                         Icon(
-                            imageVector = icon,
+                            imageVector = item.icon,
                             contentDescription = null,
                             tint = itemIconColor
                         )
@@ -143,7 +128,7 @@ fun CategoryDropdown(
                         }
                     },
                     onClick = {
-                        onCategorySelected(categoryInt)
+                        onCategorySelected(item.id)
                         expanded = false
                     }
                 )

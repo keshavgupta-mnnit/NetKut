@@ -23,8 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import com.kglabs28.netkut.ui.main.AppItemUiState
 import com.kglabs28.netkut.ui.theme.AccentBlue
@@ -46,7 +44,10 @@ fun AppItemRow(
         )
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            modifier = Modifier.padding(
+                horizontal = Dimens.PaddingAppRowHorizontal,
+                vertical = Dimens.PaddingAppRowVertical
+            ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             val icon = appState.appInfo.icon
@@ -54,20 +55,20 @@ fun AppItemRow(
                 Image(
                     bitmap = icon.toBitmap().asImageBitmap(),
                     contentDescription = null,
-                    modifier = Modifier.size(38.dp)
+                    modifier = Modifier.size(Dimens.IconSizeSmall)
                 )
             } else {
                 Icon(
                     imageVector = Icons.Default.Warning,
                     contentDescription = null,
-                    modifier = Modifier.size(38.dp)
+                    modifier = Modifier.size(Dimens.IconSizeSmall)
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(Dimens.PaddingMedium))
             Text(
                 text = appState.appInfo.appName,
                 style = TextStyle(
-                    fontSize = 15.sp,
+                    fontSize = Dimens.FontSizeTitle,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.White
                 ),

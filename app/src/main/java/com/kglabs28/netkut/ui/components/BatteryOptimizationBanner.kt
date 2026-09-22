@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.kglabs28.netkut.ui.theme.Dimens
 import com.kglabs28.netkut.ui.theme.Strings
+import com.kglabs28.netkut.util.VpnUtils
 
 @Composable
 fun BatteryOptimizationBanner(
@@ -47,10 +48,7 @@ fun BatteryOptimizationBanner(
             Spacer(modifier = Modifier.height(Dimens.SpacingMedium))
             Button(
                 onClick = {
-                    val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                        data = Uri.parse("package:${context.packageName}")
-                    }
-                    context.startActivity(intent)
+                    VpnUtils.openBatteryOptimizationSettings(context)
                     onDismiss()
                 },
                 colors = ButtonDefaults.buttonColors(

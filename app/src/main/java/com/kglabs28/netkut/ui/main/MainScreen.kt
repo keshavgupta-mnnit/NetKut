@@ -72,6 +72,7 @@ import com.kglabs28.netkut.ui.theme.GradientStart
 import com.kglabs28.netkut.ui.theme.InputBackground
 import com.kglabs28.netkut.ui.theme.Strings
 import com.kglabs28.netkut.ui.theme.TextMutedBlue
+import com.kglabs28.netkut.util.VpnUtils
 import com.kglabs28.netkut.vpn.NetCutVpnService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -85,25 +86,24 @@ fun MainScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     
-    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-    val isIgnoringBatteryOptimizations = pm.isIgnoringBatteryOptimizations(context.packageName)
+    val isIgnoringBatteryOptimizations = VpnUtils.isIgnoringBatteryOptimizations(context)
     var showBatteryBanner by remember { mutableStateOf(!isIgnoringBatteryOptimizations) }
     
     val vpnLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            startVpnService(context)
+            VpnUtils.startVpnService(context)
         }
     }
 
     val onToggleApp = { packageName: String, blocked: Boolean ->
         if (blocked) {
-            val vpnIntent = VpnService.prepare(context)
+            val vpnIntent = VpnUtils.prepareVpnIntent(context)
             if (vpnIntent != null) {
                 vpnLauncher.launch(vpnIntent)
             } else {
-                startVpnService(context)
+                VpnUtils.startVpnService(context)
             }
         }
         viewModel.toggleAppBlocked(packageName, blocked)
@@ -289,9 +289,4 @@ fun MainScreen(
             }
         }
     }
-}
-
-private fun startVpnService(context: Context) {
-    val intent = Intent(context, NetCutVpnService::class.java)
-    ContextCompat.startForegroundService(context, intent)
 }
