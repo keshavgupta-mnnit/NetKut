@@ -14,12 +14,14 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,6 +40,14 @@ import com.kglabs28.netkut.vpn.NetCutVpnService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -106,7 +116,9 @@ fun MainScreen(
                 TopAppBar(
                     title = { Text("NetKut") },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
+                        containerColor = Color.Transparent,
+                        titleContentColor = Color.White,
+                        actionIconContentColor = Color.White
                     ),
                     actions = {
                         IconButton(onClick = {
@@ -209,10 +221,30 @@ fun MainScreen(
                 onValueChange = { viewModel.updateSearchQuery(it) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Search apps") },
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                placeholder = {
+                    Text(
+                        if (uiState.selectedTab == AppTab.SELECTED_APPS) "Search selected apps..." else "Search apps"
+                    )
+                },
                 singleLine = true,
+                textStyle = TextStyle(fontSize = 14.sp, color = Color.White),
                 shape = RoundedCornerShape(24.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFF162339),
+                    unfocusedContainerColor = Color(0xFF162339),
+                    disabledContainerColor = Color(0xFF162339),
+                    focusedBorderColor = Color(0xFF2575FC),
+                    unfocusedBorderColor = Color(0xFF1C3D6A),
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedPlaceholderColor = Color(0xFF8B9CB5),
+                    unfocusedPlaceholderColor = Color(0xFF8B9CB5),
+                    focusedLeadingIconColor = Color(0xFF8B9CB5),
+                    unfocusedLeadingIconColor = Color(0xFF8B9CB5),
+                    focusedTrailingIconColor = Color(0xFF8B9CB5),
+                    unfocusedTrailingIconColor = Color(0xFF8B9CB5)
+                ),
                 leadingIcon = {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
                 },
@@ -234,19 +266,33 @@ fun MainScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     CategoryDropdown(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1.3f),
                         selectedCategory = uiState.selectedCategory,
                         onCategorySelected = { viewModel.setCategory(it) }
                     )
                     
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
                     
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("System apps", style = MaterialTheme.typography.bodyMedium)
-                        Spacer(Modifier.width(8.dp))
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Text(
+                            "Show system apps",
+                            style = TextStyle(fontSize = 12.sp, color = Color(0xFF8B9CB5))
+                        )
+                        Spacer(Modifier.width(6.dp))
                         Switch(
                             checked = uiState.showSystemApps,
-                            onCheckedChange = { viewModel.toggleSystemApps(it) }
+                            onCheckedChange = { viewModel.toggleSystemApps(it) },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = Color(0xFF3B95FF),
+                                uncheckedThumbColor = Color(0xFF8B9CB5),
+                                uncheckedTrackColor = Color(0xFF162339),
+                                uncheckedBorderColor = Color.Transparent
+                            )
                         )
                     }
                 }
@@ -255,11 +301,24 @@ fun MainScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.End
+                            .padding(horizontal = 16.dp, vertical = 2.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TextButton(onClick = { viewModel.clearAllBlockedApps() }) {
-                            Text("Clear All")
+                        val count = uiState.apps.size
+                        Text(
+                            text = "$count ${if (count == 1) "app" else "apps"} selected",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
+                        )
+                        TextButton(
+                            onClick = { viewModel.clearAllBlockedApps() },
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text("Clear All", color = Color(0xFF3B95FF), fontSize = 14.sp)
                         }
                     }
                 }
@@ -296,6 +355,8 @@ fun MainScreen(
                         modifier = Modifier.weight(1f),
                         apps = uiState.apps,
                         searchQuery = uiState.searchQuery,
+                        selectedCategory = uiState.selectedCategory,
+                        selectedTab = uiState.selectedTab,
                         onToggle = onToggleApp
                     )
                 }
@@ -313,16 +374,16 @@ fun CategoryDropdown(
     onCategorySelected: (Int?) -> Unit
 ) {
     val categories = listOf(
-        null to "All",
-        0 to "Games",
-        4 to "Social",
-        2 to "Video",
-        1 to "Audio",
-        7 to "Product"
+        Triple(null, "All Categories", Icons.Default.Apps),
+        Triple(0, "Games", Icons.Default.SportsEsports),
+        Triple(4, "Social", Icons.Default.People),
+        Triple(2, "Video", Icons.Default.Movie),
+        Triple(1, "Audio", Icons.Default.MusicNote),
+        Triple(7, "Product", Icons.Default.ShoppingBag)
     )
 
     var expanded by remember { mutableStateOf(false) }
-    val selectedText = categories.find { it.first == selectedCategory }?.second ?: "All"
+    val selectedItem = categories.find { it.first == selectedCategory } ?: categories.first()
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -330,21 +391,69 @@ fun CategoryDropdown(
         modifier = modifier
     ) {
         OutlinedTextField(
-            value = selectedText,
+            value = selectedItem.second,
             onValueChange = {},
             readOnly = true,
+            textStyle = TextStyle(fontSize = 13.sp, color = Color.White),
+            leadingIcon = {
+                Icon(
+                    imageVector = selectedItem.third,
+                    contentDescription = null,
+                    tint = Color(0xFF8B9CB5)
+                )
+            },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor(),
             singleLine = true,
-            shape = RoundedCornerShape(24.dp)
+            shape = RoundedCornerShape(24.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color(0xFF162339),
+                unfocusedContainerColor = Color(0xFF162339),
+                disabledContainerColor = Color(0xFF162339),
+                focusedBorderColor = Color(0xFF2575FC),
+                unfocusedBorderColor = Color(0xFF1C3D6A),
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedTrailingIconColor = Color(0xFF8B9CB5),
+                unfocusedTrailingIconColor = Color(0xFF8B9CB5)
+            )
         )
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = Color(0xFF162339)
         ) {
-            categories.forEach { (categoryInt, label) ->
+            categories.forEach { (categoryInt, label, icon) ->
+                val isSelected = categoryInt == selectedCategory
+                val itemTextColor = if (isSelected) Color(0xFF3B95FF) else Color.White
+                val itemIconColor = if (isSelected) Color(0xFF3B95FF) else Color(0xFF8B9CB5)
+
                 DropdownMenuItem(
-                    text = { Text(label) },
+                    text = {
+                        Text(
+                            text = label,
+                            color = itemTextColor,
+                            fontSize = 13.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = itemIconColor
+                        )
+                    },
+                    trailingIcon = {
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Selected",
+                                tint = Color(0xFF3B95FF)
+                            )
+                        }
+                    },
                     onClick = {
                         onCategorySelected(categoryInt)
                         expanded = false
@@ -360,12 +469,14 @@ fun AppListAdaptive(
     modifier: Modifier = Modifier,
     apps: List<AppItemUiState>,
     searchQuery: String,
+    selectedCategory: Int?,
+    selectedTab: AppTab,
     onToggle: (String, Boolean) -> Unit
 ) {
     val gridState = rememberLazyGridState()
     
-    LaunchedEffect(searchQuery) {
-        if (searchQuery.isEmpty() && apps.isNotEmpty()) {
+    LaunchedEffect(searchQuery, selectedCategory, selectedTab) {
+        if (apps.isNotEmpty()) {
             gridState.animateScrollToItem(0)
         }
     }
@@ -374,9 +485,9 @@ fun AppListAdaptive(
         columns = GridCells.Adaptive(minSize = 350.dp),
         state = gridState,
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         items(apps, key = { it.appInfo.packageName }) { appState ->
             AppItemRow(
@@ -419,17 +530,24 @@ fun AppItemRow(
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(appState.appInfo.appName, style = MaterialTheme.typography.titleMedium)
+                Text(appState.appInfo.appName, style = MaterialTheme.typography.titleMedium, color = Color.White)
                 Text(
                     appState.appInfo.packageName,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = Color(0xFF8B9CB5),
                     maxLines = 1
                 )
             }
             Switch(
                 checked = appState.isBlocked,
-                onCheckedChange = onToggle
+                onCheckedChange = onToggle,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = Color(0xFF3B95FF),
+                    uncheckedThumbColor = Color(0xFF8B9CB5),
+                    uncheckedTrackColor = Color(0xFF0D182A),
+                    uncheckedBorderColor = Color.Transparent
+                )
             )
         }
     }
