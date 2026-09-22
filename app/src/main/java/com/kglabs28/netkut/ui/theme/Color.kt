@@ -10,9 +10,20 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-// NetKut Dark Theme Colors
-val NavyBackground = Color(0xFF0B132B)
-val CardBackground = Color(0xFF1C2438)
-val PrimaryBlue = Color(0xFF3B82F6)
+// Legacy Theme Palette
+val PrimaryBlue = Color(0xFF3B95FF)
+val NavyBackground = Color(0xFF050B14)
 val TextPrimary = Color(0xFFFFFFFF)
-val TextSecondary = Color(0xFFA0AEC0)
+val TextSecondary = Color(0xFF8B9CB5)
+
+// NetKut Custom Theme Colors
+val GradientStart = Color(0xFF0F1E36)
+val GradientEnd = Color(0xFF050B14)
+val CardBackground = Color(0xFF162339)
+val InputBackground = Color(0xFF162339)
+val UncheckedTrackColor = Color(0xFF0D182A)
+val FocusedBorderColor = Color(0xFF2575FC)
+val UnfocusedBorderColor = Color(0xFF1C3D6A)
+val AccentBlue = Color(0xFF3B95FF)
+val TextMutedBlue = Color(0xFF8B9CB5)
+val DividerWhite = Color(0x1AFFFFFF)
