@@ -27,3 +27,8 @@ val UnfocusedBorderColor = Color(0xFF1C3D6A)
 val AccentBlue = Color(0xFF3B95FF)
 val TextMutedBlue = Color(0xFF8B9CB5)
 val DividerWhite = Color(0x1AFFFFFF)
+
+// Action Button Tones
+val ButtonGreen = Color(0xFF2E9E66)
+val ButtonOrange = Color(0xFFD97706)
+val ButtonRed = Color(0xFFE53E3E)

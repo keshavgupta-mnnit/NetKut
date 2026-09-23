@@ -24,6 +24,9 @@ object Strings {
     const val CategoryProduct = "Product"
     const val SelectedIndicator = "Selected"
     const val Cancel = "Cancel"
+    const val Start = "Start"
+    const val Pause = "Pause"
+    const val Sync = "Sync"
     
     fun appsSelectedCount(count: Int): String {
         return "$count ${if (count == 1) "app" else "apps"} selected"

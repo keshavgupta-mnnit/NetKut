@@ -63,6 +63,7 @@ import com.kglabs28.netkut.ui.components.BatteryOptimizationBanner
 import com.kglabs28.netkut.ui.components.CategoryDropdown
 import com.kglabs28.netkut.ui.components.EmptySelectedApps
 import com.kglabs28.netkut.ui.components.SearchBar
+import com.kglabs28.netkut.ui.components.SelectedAppsActionRow
 import com.kglabs28.netkut.ui.components.SyncDialog
 import com.kglabs28.netkut.ui.theme.AccentBlue
 import com.kglabs28.netkut.ui.theme.Dimens
@@ -84,7 +85,6 @@ fun MainScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
     
     val isIgnoringBatteryOptimizations = VpnUtils.isIgnoringBatteryOptimizations(context)
     var showBatteryBanner by remember { mutableStateOf(!isIgnoringBatteryOptimizations) }
@@ -127,18 +127,7 @@ fun MainScreen(
                         containerColor = Color.Transparent,
                         titleContentColor = Color.White,
                         actionIconContentColor = Color.White
-                    ),
-                    actions = {
-                        IconButton(onClick = {
-                            coroutineScope.launch {
-                                viewModel.setShowSyncDialog(true)
-                                delay(2000)
-                                viewModel.setShowSyncDialog(false)
-                            }
-                        }) {
-                            Icon(imageVector = Icons.Default.Refresh, contentDescription = Strings.Refresh)
-                        }
-                    }
+                    )
                 )
             },
             bottomBar = {
@@ -240,28 +229,25 @@ fun MainScreen(
                     }
                 } else if (uiState.selectedTab == AppTab.SELECTED_APPS) {
                     if (uiState.apps.isNotEmpty()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = Dimens.PaddingLarge, vertical = Dimens.PaddingTiny),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = Strings.appsSelectedCount(uiState.apps.size),
-                                style = TextStyle(
-                                    fontSize = Dimens.FontSizeRegular,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color.White
-                                )
-                            )
-                            TextButton(
-                                onClick = { viewModel.clearAllBlockedApps() },
-                                contentPadding = PaddingValues(Dimens.PaddingZero)
-                            ) {
-                                Text(Strings.ClearAll, color = AccentBlue, fontSize = Dimens.FontSizeRegular)
+                        SelectedAppsActionRow(
+                            onStartClick = {
+                                val vpnIntent = VpnUtils.prepareVpnIntent(context)
+                                if (vpnIntent != null) {
+                                    vpnLauncher.launch(vpnIntent)
+                                } else {
+                                    VpnUtils.startVpnService(context)
+                                }
+                            },
+                            onPauseClick = {
+                                VpnUtils.stopVpnService(context)
+                            },
+                            onSyncClick = {
+                                viewModel.setShowSyncDialog(true)
+                            },
+                            onClearAllClick = {
+                                viewModel.clearAllBlockedApps()
                             }
-                        }
+                        )
                     }
                 }
 

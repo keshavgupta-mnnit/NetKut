@@ -15,6 +15,13 @@ object VpnUtils {
         ContextCompat.startForegroundService(context, intent)
     }
 
+    fun stopVpnService(context: Context) {
+        val intent = Intent(context, NetCutVpnService::class.java).apply {
+            action = NetCutVpnService.ACTION_DISCONNECT
+        }
+        context.startService(intent)
+    }
+
     fun prepareVpnIntent(context: Context): Intent? {
         return VpnService.prepare(context)
     }
