@@ -10,8 +10,8 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import com.kglabs28.netkut.ui.main.AppItemUiState
-import com.kglabs28.netkut.ui.main.AppTab
+import com.kglabs28.netkut.ui.screens.main.AppItemUiState
+import com.kglabs28.netkut.ui.screens.main.AppTab
 import com.kglabs28.netkut.ui.theme.Dimens
 
 @Composable

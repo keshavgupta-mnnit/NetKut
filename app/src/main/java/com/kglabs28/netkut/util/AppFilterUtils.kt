@@ -1,8 +1,8 @@
 package com.kglabs28.netkut.util
 
 import com.kglabs28.netkut.domain.model.AppInfo
-import com.kglabs28.netkut.ui.main.AppItemUiState
-import com.kglabs28.netkut.ui.main.AppTab
+import com.kglabs28.netkut.ui.screens.main.AppItemUiState
+import com.kglabs28.netkut.ui.screens.main.AppTab
 
 object AppFilterUtils {
     fun filterApps(

@@ -28,6 +28,28 @@ object Strings {
     const val Pause = "Pause"
     const val Sync = "Sync"
     
+    // Onboarding Strings
+    const val OnboardingWelcomeTitle = "Block Internet Access\nfor Selected Apps"
+    const val OnboardingWelcomeDescPart1 = "NetKut creates a "
+    const val OnboardingWelcomeDescPart2 = "VPN service to block"
+    const val OnboardingWelcomeDescPart3 = " the internet for the apps you choose.\nDon't worry if you see a VPN icon in the status bar — it's normal!"
+    
+    const val HowItWorksTitle = "How It Works"
+    const val VpnServiceTitle = "VPN Service"
+    const val VpnServiceDesc = "Creates a local VPN connection to block the internet for selected apps. This keeps your device secure and private."
+    const val StartPauseTitle = "Start / Pause"
+    const val StartPauseDesc = "Start the service to block internet for selected apps. Pause it anytime to get back online."
+    const val SyncIntervalTitle = "Sync Every 2 Hours"
+    const val SyncIntervalDesc = "The app will automatically sync and reapply the rules every 2 hours. You can change this interval in settings."
+    
+    const val VpnNoticeTitle = "About VPN Icon in Status Bar"
+    const val VpnNoticeDesc = "You might see a VPN icon in your status bar. This means NetKut is working as a VPN service to block the internet for selected apps."
+    const val ExpectedSafeTitle = "This is expected and safe."
+    const val ExpectedSafeDesc = "It doesn't mean your device is being tracked."
+    
+    const val Next = "Next"
+    const val OkGotIt = "Ok Got It"
+
     fun appsSelectedCount(count: Int): String {
         return "$count ${if (count == 1) "app" else "apps"} selected"
     }

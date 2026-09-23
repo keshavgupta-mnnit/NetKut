@@ -4,12 +4,12 @@ import android.app.Application
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.kglabs28.netkut.worker.VpnSyncWorker
-import java.util.concurrent.TimeUnit
 import com.kglabs28.netkut.data.repository.AppRepositoryImpl
 import com.kglabs28.netkut.data.repository.BlocklistRepositoryImpl
 import com.kglabs28.netkut.domain.repository.AppRepository
 import com.kglabs28.netkut.domain.repository.BlocklistRepository
+import com.kglabs28.netkut.worker.VpnSyncWorker
+import java.util.concurrent.TimeUnit
 
 interface AppContainer {
     val appRepository: AppRepository

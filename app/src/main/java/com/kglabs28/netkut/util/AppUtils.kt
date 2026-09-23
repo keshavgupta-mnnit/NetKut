@@ -1,5 +1,7 @@
 package com.kglabs28.netkut.util
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Movie
@@ -17,6 +19,9 @@ data class CategoryItem(
 )
 
 object AppUtils {
+    private const val PREFS_NAME = "netkut_prefs"
+    private const val KEY_ONBOARDING_COMPLETED = "has_completed_onboarding"
+
     val categories: List<CategoryItem> = listOf(
         CategoryItem(null, Strings.AllCategories, Icons.Default.Apps),
         CategoryItem(0, Strings.CategoryGames, Icons.Default.SportsEsports),
@@ -28,5 +33,17 @@ object AppUtils {
 
     fun getCategoryItem(id: Int?): CategoryItem {
         return categories.find { it.id == id } ?: categories.first()
+    }
+
+    private fun getPrefs(context: Context): SharedPreferences {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
+
+    fun getOnboardingCompleted(context: Context): Boolean {
+        return getPrefs(context).getBoolean(KEY_ONBOARDING_COMPLETED, false)
+    }
+
+    fun setOnboardingCompleted(context: Context, completed: Boolean) {
+        getPrefs(context).edit().putBoolean(KEY_ONBOARDING_COMPLETED, completed).apply()
     }
 }

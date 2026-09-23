@@ -32,3 +32,11 @@ val DividerWhite = Color(0x1AFFFFFF)
 val ButtonGreen = Color(0xFF2E9E66)
 val ButtonOrange = Color(0xFFD97706)
 val ButtonRed = Color(0xFFE53E3E)
+
+// Onboarding Colors
+val IconBackgroundBlue = Color(0xFF0F2C59)
+val PhoneBorderBackground = Color(0xFF0B192E)
+val PhoneBorderColor = Color(0xFF1E3D6A)
+val FeatureSyncPurple = Color(0xFF8B5CF6)
+val InactiveDotColor = Color(0xFF1E3A60)
+val BlockBadgeRed = Color(0xFFE53E3E)

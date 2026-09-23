@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.graphics.drawable.toBitmap
-import com.kglabs28.netkut.ui.main.AppItemUiState
+import com.kglabs28.netkut.ui.screens.main.AppItemUiState
 import com.kglabs28.netkut.ui.theme.AccentBlue
 import com.kglabs28.netkut.ui.theme.CardBackground
 import com.kglabs28.netkut.ui.theme.Dimens

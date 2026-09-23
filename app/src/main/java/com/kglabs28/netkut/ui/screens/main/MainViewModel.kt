@@ -1,4 +1,4 @@
-package com.kglabs28.netkut.ui.main
+package com.kglabs28.netkut.ui.screens.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -92,7 +92,6 @@ class MainViewModel(
     private fun loadApps() {
         viewModelScope.launch {
             _isLoading.value = true
-            // Load all apps, filtering will be done in the combine flow
             _installedApps.value = appRepository.getInstalledApps(includeSystemApps = true)
             _isLoading.value = false
         }

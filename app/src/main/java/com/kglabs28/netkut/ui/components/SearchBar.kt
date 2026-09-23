@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import com.kglabs28.netkut.ui.main.AppTab
+import com.kglabs28.netkut.ui.screens.main.AppTab
 import com.kglabs28.netkut.ui.theme.Dimens
 import com.kglabs28.netkut.ui.theme.FocusedBorderColor
 import com.kglabs28.netkut.ui.theme.InputBackground
