@@ -33,15 +33,22 @@ object Dimens {
     val IconSizeBadgeSmall = 16.dp
     
     val OnboardingGraphicHeight = 240.dp
+    val OnboardingGraphicCompactHeight = 125.dp
     val OnboardingStatusGraphicHeight = 180.dp
     val PhoneIllustrationWidth = 110.dp
+    val PhoneIllustrationWidthCompact = 75.dp
     val PhoneIllustrationHeight = 180.dp
+    val PhoneIllustrationHeightCompact = 115.dp
     val ShieldCardWidth = 70.dp
+    val ShieldCardWidthCompact = 50.dp
     val ShieldCardHeight = 90.dp
+    val ShieldCardHeightCompact = 65.dp
     val FeatureCardIconSize = 44.dp
+    val FeatureCardIconSizeSmall = 34.dp
     val DotActiveSize = 8.dp
     val DotInactiveSize = 6.dp
     val ButtonHeightLarge = 48.dp
+    val ButtonHeightCompact = 42.dp
     
     val DropdownHeight = 38.dp
     val DividerThickness = 1.dp
@@ -51,7 +58,9 @@ object Dimens {
     val FontSizeMedium = 13.sp
     val FontSizeRegular = 14.sp
     val FontSizeTitle = 15.sp
-    val FontSizeCardTitle = 16.sp
     val FontSizeHeading = 20.sp
     val FontSizeLargeHeading = 22.sp
+    val FontSizeCompactDesc = 11.5.sp
+    val FontSizeCompactTitle = 13.sp
+    val FontSizeCompactHeading = 17.sp
 }

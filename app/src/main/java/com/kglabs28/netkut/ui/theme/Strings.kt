@@ -32,23 +32,20 @@ object Strings {
     const val StatusActiveWithoutSync = "Status: Active without automatic sync"
     
     // Onboarding Strings
-    const val OnboardingWelcomeTitle = "Block Internet Access\nfor Selected Apps"
-    const val OnboardingWelcomeDescPart1 = "NetKut creates a "
-    const val OnboardingWelcomeDescPart2 = "VPN service to block"
-    const val OnboardingWelcomeDescPart3 = " the internet for the apps you choose.\nDon't worry if you see a VPN icon in the status bar — it's normal!"
+    const val OnboardingWelcomeTitle = "Block Internet Access\n for Selected Apps"
     
     const val HowItWorksTitle = "How It Works"
     const val VpnServiceTitle = "VPN Service"
     const val VpnServiceDesc = "Creates a local VPN connection to block the internet for selected apps. This keeps your device secure and private."
     const val StartPauseTitle = "Start / Pause"
-    const val StartPauseDesc = "Start the service to block internet for selected apps. Pause it anytime to get back online."
+    const val StartPauseDesc = "Control blocking anytime using Start and Pause on your dashboard."
     const val SyncIntervalTitle = "Sync Every 2 Hours"
-    const val SyncIntervalDesc = "The app will automatically sync and reapply the rules every 2 hours. You can change this interval in settings."
+    const val SyncIntervalDesc = "Automatically syncs and reapplies your rules every 2 hours."
     
-    const val VpnNoticeTitle = "About VPN Icon in Status Bar"
-    const val VpnNoticeDesc = "You might see a VPN icon in your status bar. This means NetKut is working as a VPN service to block the internet for selected apps."
-    const val ExpectedSafeTitle = "This is expected and safe."
-    const val ExpectedSafeDesc = "It doesn't mean your device is being tracked."
+    const val VpnNoticeTitle = "VPN Icon in Status Bar"
+    const val VpnNoticeDesc = "A status bar VPN icon is normal, safe, and indicates NetKut is active."
+    const val ExpectedSafeTitle = "Expected & Safe"
+    const val ExpectedSafeDesc = "Operates 100% on-device. Your data is private and never tracked."
     
     const val Next = "Next"
     const val OkGotIt = "Ok Got It"
