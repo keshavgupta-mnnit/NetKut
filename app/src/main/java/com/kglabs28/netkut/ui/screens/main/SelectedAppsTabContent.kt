@@ -9,11 +9,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.kglabs28.netkut.ui.components.AppListAdaptive
 import com.kglabs28.netkut.ui.components.EmptySelectedApps
 import com.kglabs28.netkut.ui.components.SelectedAppsActionRow
+import com.kglabs28.netkut.util.AppUtils
 import com.kglabs28.netkut.util.VpnUtils
 
 @Composable
@@ -25,10 +30,17 @@ fun SelectedAppsTabContent(
     onToggleApp: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var isVpnActive by remember { mutableStateOf(AppUtils.getVpnActive(context)) }
+    val syncIntervalMinutes = AppUtils.getSyncIntervalMinutes(context)
+
     Column(modifier = modifier.fillMaxSize()) {
         if (uiState.apps.isNotEmpty()) {
             SelectedAppsActionRow(
+                isVpnActive = isVpnActive,
+                syncIntervalMinutes = syncIntervalMinutes,
                 onStartClick = {
+                    AppUtils.setVpnActive(context, true)
+                    isVpnActive = true
                     val vpnIntent = VpnUtils.prepareVpnIntent(context)
                     if (vpnIntent != null) {
                         vpnLauncher.launch(vpnIntent)
@@ -37,7 +49,8 @@ fun SelectedAppsTabContent(
                     }
                 },
                 onPauseClick = {
-                    VpnUtils.stopVpnService(context)
+                    AppUtils.setVpnActive(context, false)
+                    isVpnActive = false
                 },
                 onSyncClick = {
                     viewModel.setShowSyncDialog(true)

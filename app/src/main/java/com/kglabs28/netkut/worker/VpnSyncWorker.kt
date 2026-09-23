@@ -6,6 +6,7 @@ import android.net.VpnService
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.kglabs28.netkut.NetKutApplication
+import com.kglabs28.netkut.util.AppUtils
 import com.kglabs28.netkut.vpn.NetCutVpnService
 import kotlinx.coroutines.flow.first
 
@@ -16,6 +17,11 @@ class VpnSyncWorker(
 
     override suspend fun doWork(): Result {
         val app = applicationContext as? NetKutApplication ?: return Result.failure()
+        
+        if (!AppUtils.getVpnActive(applicationContext)) {
+            return Result.success()
+        }
+
         val blocklistRepository = app.container.blocklistRepository
         
         try {

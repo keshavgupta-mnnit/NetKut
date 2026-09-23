@@ -27,6 +27,9 @@ object Strings {
     const val Start = "Start"
     const val Pause = "Pause"
     const val Sync = "Sync"
+    const val StatusActive = "Status: Active"
+    const val StatusPaused = "Status: Paused"
+    const val StatusActiveWithoutSync = "Status: Active without automatic sync"
     
     // Onboarding Strings
     const val OnboardingWelcomeTitle = "Block Internet Access\nfor Selected Apps"
@@ -50,7 +53,33 @@ object Strings {
     const val Next = "Next"
     const val OkGotIt = "Ok Got It"
 
+    // Settings Strings
+    const val SettingsTitle = "Settings"
+    const val SyncIntervalSettingTitle = "Sync Interval"
+    const val SyncIntervalSettingDesc = "Set how often to sync rules"
+    const val HowItWorksLearnMore = "Learn how NetKut works"
+    const val AboutUsTitle = "About Us"
+    const val RateUsOnPlayStore = "Rate us on Play Store"
+    const val AppTagline = "Block Internet. Stay Focused."
+    const val AboutUsDesc = "NetKut helps you take control of your time by blocking internet access for selected apps. Build a healthier and more productive digital life."
+    const val LoveOurApp = "Love our app?"
+    const val VersionText = "Version 1.0.0"
+
+    // Sync Interval Options
+    const val SyncDisable = "Disable"
+    const val SyncEvery1Hour = "Every 1 hour"
+    const val SyncEvery2Hours = "Every 2 hours"
+    const val SyncEvery3Hours = "Every 3 hours"
+    const val SyncEvery4Hours = "Every 4 hours"
+    const val SyncEvery6Hours = "Every 6 hours"
+    const val SyncEvery8Hours = "Every 8 hours"
+    const val SyncEvery12Hours = "Every 12 hours"
+
     fun appsSelectedCount(count: Int): String {
         return "$count ${if (count == 1) "app" else "apps"} selected"
+    }
+
+    fun statusActiveWithSync(intervalLabel: String): String {
+        return "Status: Active with automatic sync ${intervalLabel.lowercase()}"
     }
 }

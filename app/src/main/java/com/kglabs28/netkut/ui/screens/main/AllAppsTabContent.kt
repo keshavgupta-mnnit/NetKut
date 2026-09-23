@@ -18,13 +18,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import com.kglabs28.netkut.ui.components.AppDropdown
 import com.kglabs28.netkut.ui.components.AppListAdaptive
-import com.kglabs28.netkut.ui.components.CategoryDropdown
+import com.kglabs28.netkut.ui.components.DropdownItem
 import com.kglabs28.netkut.ui.theme.AccentBlue
 import com.kglabs28.netkut.ui.theme.Dimens
 import com.kglabs28.netkut.ui.theme.InputBackground
 import com.kglabs28.netkut.ui.theme.Strings
 import com.kglabs28.netkut.ui.theme.TextMutedBlue
+import com.kglabs28.netkut.util.AppUtils
 
 @Composable
 fun AllAppsTabContent(
@@ -41,10 +43,15 @@ fun AllAppsTabContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            CategoryDropdown(
-                modifier = Modifier.weight(1.3f),
-                selectedCategory = uiState.selectedCategory,
-                onCategorySelected = { viewModel.setCategory(it) }
+            val categoryItems = AppUtils.categories.map {
+                DropdownItem(it.id, it.label, it.icon)
+            }
+
+            AppDropdown(
+                items = categoryItems,
+                selectedId = uiState.selectedCategory,
+                onItemSelected = { viewModel.setCategory(it) },
+                modifier = Modifier.weight(1.3f)
             )
             
             Spacer(modifier = Modifier.width(Dimens.SpacingMedium))
