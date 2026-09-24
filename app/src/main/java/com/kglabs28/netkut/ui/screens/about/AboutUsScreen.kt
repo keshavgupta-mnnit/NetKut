@@ -215,7 +215,8 @@ fun AboutUsScreen(
 
                             // 5 Stars Row
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 repeat(5) {
