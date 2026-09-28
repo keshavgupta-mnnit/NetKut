@@ -25,10 +25,10 @@ object Strings {
     const val SelectedIndicator = "Selected"
     const val Cancel = "Cancel"
     const val Start = "Start"
-    const val Pause = "Pause"
+    const val Stop = "Stop"
     const val Sync = "Sync"
     const val StatusActive = "Status: Active"
-    const val StatusPaused = "Status: Paused"
+    const val StatusStopped = "Status: Stopped"
     const val StatusActiveWithoutSync = "Status: Active without automatic sync"
     
     // Onboarding Strings
@@ -37,8 +37,8 @@ object Strings {
     const val HowItWorksTitle = "How It Works"
     const val VpnServiceTitle = "VPN Service"
     const val VpnServiceDesc = "Creates a local VPN connection to block the internet for selected apps. This keeps your device secure and private."
-    const val StartPauseTitle = "Start / Pause"
-    const val StartPauseDesc = "Control blocking anytime using Start and Pause on your dashboard."
+    const val StartPauseTitle = "Start / Stop"
+    const val StartPauseDesc = "Control blocking anytime using Start and Stop on your dashboard."
     const val SyncIntervalTitle = "Sync Every 2 Hours"
     const val SyncIntervalDesc = "Automatically syncs and reapplies your rules every 2 hours."
     
@@ -71,6 +71,12 @@ object Strings {
     const val SyncEvery6Hours = "Every 6 hours"
     const val SyncEvery8Hours = "Every 8 hours"
     const val SyncEvery12Hours = "Every 12 hours"
+
+    // Shortcut Strings
+    const val StartVpn = "Start VPN"
+    const val StopVpn = "Stop VPN"
+    const val StartVpnLong = "Start NetKut VPN"
+    const val StopVpnLong = "Stop NetKut VPN"
 
     fun appsSelectedCount(count: Int): String {
         return "$count ${if (count == 1) "app" else "apps"} selected"

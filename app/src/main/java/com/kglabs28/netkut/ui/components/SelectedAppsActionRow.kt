@@ -16,9 +16,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -51,7 +50,7 @@ fun SelectedAppsActionRow(
     modifier: Modifier = Modifier
 ) {
     val statusText = when {
-        !isVpnActive -> Strings.StatusPaused
+        !isVpnActive -> Strings.StatusStopped
         syncIntervalMinutes <= 0 -> Strings.StatusActiveWithoutSync
         else -> Strings.statusActiveWithSync(AppUtils.getSyncIntervalItem(syncIntervalMinutes).label)
     }
@@ -120,7 +119,7 @@ fun SelectedAppsActionRow(
                 }
             }
 
-            // Pause Button
+            // Stop Button
             Button(
                 onClick = onPauseClick,
                 modifier = Modifier
@@ -135,13 +134,13 @@ fun SelectedAppsActionRow(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.Pause,
-                        contentDescription = Strings.Pause,
+                        imageVector = Icons.Default.Stop,
+                        contentDescription = Strings.Stop,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = Strings.Pause,
+                        text = Strings.Stop,
                         style = TextStyle(fontSize = Dimens.FontSizeMedium, fontWeight = FontWeight.SemiBold)
                     )
                 }

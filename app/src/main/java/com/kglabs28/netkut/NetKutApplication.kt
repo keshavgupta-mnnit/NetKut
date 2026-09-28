@@ -8,6 +8,7 @@ import com.kglabs28.netkut.data.repository.AppRepositoryImpl
 import com.kglabs28.netkut.data.repository.BlocklistRepositoryImpl
 import com.kglabs28.netkut.domain.repository.AppRepository
 import com.kglabs28.netkut.domain.repository.BlocklistRepository
+import com.kglabs28.netkut.util.ShortcutUtils
 import com.kglabs28.netkut.worker.VpnSyncWorker
 import java.util.concurrent.TimeUnit
 
@@ -35,6 +36,7 @@ class NetKutApplication : Application() {
         container = DefaultAppContainer(this)
         
         setupWorkManager()
+        ShortcutUtils.setupAppShortcuts(this)
     }
 
     private fun setupWorkManager() {

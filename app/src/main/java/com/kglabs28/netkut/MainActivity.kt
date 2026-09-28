@@ -1,5 +1,6 @@
 package com.kglabs28.netkut
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -17,6 +18,8 @@ import com.kglabs28.netkut.ui.screens.onboarding.OnboardingScreen
 import com.kglabs28.netkut.ui.screens.settings.SettingsScreen
 import com.kglabs28.netkut.ui.theme.NetKutTheme
 import com.kglabs28.netkut.util.AppUtils
+import com.kglabs28.netkut.util.ShortcutUtils
+import com.kglabs28.netkut.util.VpnUtils
 
 enum class CurrentScreen {
     MAIN,
@@ -28,6 +31,7 @@ enum class CurrentScreen {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        handleShortcutIntent(intent)
         
         val appContainer = (application as NetKutApplication).container
         
@@ -105,6 +109,26 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleShortcutIntent(intent)
+    }
+
+    private fun handleShortcutIntent(intent: Intent?) {
+        when (intent?.action) {
+            ShortcutUtils.ACTION_START_VPN -> {
+                AppUtils.setVpnActive(this, true)
+                val vpnIntent = VpnUtils.prepareVpnIntent(this)
+                if (vpnIntent == null) {
+                    VpnUtils.startVpnService(this)
+                }
+            }
+            ShortcutUtils.ACTION_STOP_VPN, "com.kglabs28.netkut.ACTION_PAUSE_VPN" -> {
+                AppUtils.setVpnActive(this, false)
             }
         }
     }
