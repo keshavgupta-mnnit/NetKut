@@ -12,7 +12,7 @@ import android.os.Build
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
-import com.kglabs28.netkut.MainActivity
+import com.kglabs28.netkut.VpnActionActivity
 import com.kglabs28.netkut.ui.theme.Strings
 
 object ShortcutUtils {
@@ -22,12 +22,12 @@ object ShortcutUtils {
     fun setupAppShortcuts(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) return
 
-        val startIntent = Intent(context, MainActivity::class.java).apply {
+        val startIntent = Intent(context, VpnActionActivity::class.java).apply {
             action = ACTION_START_VPN
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
-        val stopIntent = Intent(context, MainActivity::class.java).apply {
+        val stopIntent = Intent(context, VpnActionActivity::class.java).apply {
             action = ACTION_STOP_VPN
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }

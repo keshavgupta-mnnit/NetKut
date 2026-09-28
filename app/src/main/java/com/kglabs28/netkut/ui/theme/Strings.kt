@@ -30,6 +30,8 @@ object Strings {
     const val StatusActive = "Status: Active"
     const val StatusStopped = "Status: Stopped"
     const val StatusActiveWithoutSync = "Status: Active without automatic sync"
+    const val StartBlocking = "Start Blocking"
+    const val PauseBlocking = "Stop Blocking"
     
     // Onboarding Strings
     const val OnboardingWelcomeTitle = "Block Internet Access\n for Selected Apps"
@@ -77,6 +79,8 @@ object Strings {
     const val StopVpn = "Stop VPN"
     const val StartVpnLong = "Start NetKut VPN"
     const val StopVpnLong = "Stop NetKut VPN"
+    const val VpnStartedToast = "NetKut VPN Started"
+    const val VpnStoppedToast = "NetKut VPN Stopped"
 
     fun appsSelectedCount(count: Int): String {
         return "$count ${if (count == 1) "app" else "apps"} selected"

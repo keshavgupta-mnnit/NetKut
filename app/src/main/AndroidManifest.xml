@@ -31,6 +31,13 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".VpnActionActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:noHistory="true" />
+
         <service
             android:name=".vpn.NetCutVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
