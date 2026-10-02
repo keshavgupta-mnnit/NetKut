@@ -1,5 +1,6 @@
 package com.kglabs28.netkut.vpn
 
+import android.R
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -14,14 +15,13 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.kglabs28.netkut.MainActivity
 import com.kglabs28.netkut.NetKutApplication
+import com.kglabs28.netkut.util.AppUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.io.FileInputStream
-import java.util.concurrent.atomic.AtomicBoolean
 
 class NetCutVpnService : VpnService() {
 
@@ -32,9 +32,11 @@ class NetCutVpnService : VpnService() {
         const val ACTION_DISCONNECT = "com.kglabs28.netkut.DISCONNECT_VPN"
     }
 
+    private val vpnLock = Any()
+    @Volatile
+    private var isStopping = false
     private var vpnInterface: ParcelFileDescriptor? = null
-    private var vpnThread: Thread? = null
-    private val isRunning = AtomicBoolean(false)
+    private var collectorJob: Job? = null
     private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
 
     override fun onCreate() {
@@ -44,29 +46,35 @@ class NetCutVpnService : VpnService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_DISCONNECT) {
+        if (intent?.action == ACTION_DISCONNECT || !AppUtils.getVpnActive(applicationContext)) {
+            Log.d(TAG, "Disconnect requested or VPN inactive. Shutting down service.")
+            shutdown()
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             stopSelf()
             return START_NOT_STICKY
         }
-        
+
+        isStopping = false
         startForegroundServiceWithNotification()
 
-        val repository = (application as NetKutApplication).container.blocklistRepository
-        
-        serviceScope.launch {
-            repository.blockedPackages.collectLatest { packages ->
-                if (packages.isEmpty()) {
-                    Log.d(TAG, "Blocklist is empty. Stopping VPN.")
-                    stopVpn()
-                    stopSelf()
-                } else {
-                    Log.d(TAG, "Blocklist updated: $packages")
-                    restartVpn(packages)
+        if (collectorJob == null || collectorJob?.isActive == false) {
+            collectorJob = serviceScope.launch {
+                val repository = (application as NetKutApplication).container.blocklistRepository
+                repository.blockedPackages.collectLatest { packages ->
+                    if (packages.isEmpty()) {
+                        Log.d(TAG, "Blocklist is empty. Stopping VPN.")
+                        shutdown()
+                        ServiceCompat.stopForeground(this@NetCutVpnService, ServiceCompat.STOP_FOREGROUND_REMOVE)
+                        stopSelf()
+                    } else {
+                        Log.d(TAG, "Blocklist updated: $packages")
+                        applyVpn(packages)
+                    }
                 }
             }
         }
-        
-        return START_STICKY
+
+        return START_NOT_STICKY
     }
 
     private fun startForegroundServiceWithNotification() {
@@ -85,9 +93,9 @@ class NetCutVpnService : VpnService() {
         val notification: Notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle("NetKut is active")
             .setContentText("Dropping traffic for blocked apps.")
-            .setSmallIcon(android.R.drawable.ic_secure) // fallback to standard icon
+            .setSmallIcon(R.drawable.ic_secure)
             .setContentIntent(pendingMainActivityIntent)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Disable", pendingDisconnectIntent)
+            .addAction(R.drawable.ic_menu_close_clear_cancel, "Disable", pendingDisconnectIntent)
             .setOngoing(true)
             .build()
 
@@ -115,91 +123,55 @@ class NetCutVpnService : VpnService() {
         }
     }
 
-    private fun restartVpn(blockedPackages: Set<String>) {
-        val builder = Builder()
-            .addAddress("10.0.0.2", 32)
-            .addRoute("0.0.0.0", 0)
-            .setSession("NetKut")
-            .setBlocking(true)
-        
-        for (pkg in blockedPackages) {
-            try {
-                builder.addAllowedApplication(pkg)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to add package to VPN: $pkg", e)
-            }
-        }
+    private fun applyVpn(blockedPackages: Set<String>) {
+        synchronized(vpnLock) {
+            if (isStopping) return
 
-        synchronized(this) {
-            val oldInterface = vpnInterface
-            try {
-                val newInterface = builder.establish()
-                if (newInterface == null) {
-                    Log.e(TAG, "VPN is not prepared or was revoked.")
-                    stopVpn()
-                    stopSelf()
-                    return
+            val builder = Builder()
+                .addAddress("10.0.0.2", 32)
+                .addRoute("0.0.0.0", 0)
+                .setSession("NetKut")
+                .setBlocking(true)
+
+            for (pkg in blockedPackages) {
+                try {
+                    builder.addAllowedApplication(pkg)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to add package to VPN: $pkg", e)
                 }
-                vpnInterface = newInterface
-                Log.d(TAG, "VPN interface established")
+            }
+
+            val newInterface = try {
+                builder.establish()
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to establish VPN interface", e)
+                null
+            }
+
+            if (newInterface == null) {
+                Log.e(TAG, "VPN is not prepared or was revoked.")
+                shutdown()
+                stopSelf()
                 return
             }
 
-            oldInterface?.close()
+            val oldInterface = vpnInterface
+            vpnInterface = newInterface
 
-            if (!isRunning.get() || vpnThread == null || !vpnThread!!.isAlive) {
-                startReadingFromVpn()
+            try {
+                oldInterface?.close()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error closing old VPN interface", e)
             }
         }
     }
 
-    private fun startReadingFromVpn() {
-        isRunning.set(true)
-        vpnThread = Thread {
-            val buffer = ByteArray(32767)
-            var currentInterface = vpnInterface
-            var inputStream: FileInputStream? = currentInterface?.fileDescriptor?.let { FileInputStream(it) }
-            
-            while (isRunning.get()) {
-                try {
-                    val latestInterface = vpnInterface
-                    if (latestInterface != null && latestInterface != currentInterface) {
-                        currentInterface = latestInterface
-                        inputStream = FileInputStream(currentInterface.fileDescriptor)
-                    }
+    private fun shutdown() {
+        isStopping = true
+        collectorJob?.cancel()
+        collectorJob = null
 
-                    if (inputStream != null && currentInterface != null) {
-                        val length = inputStream.read(buffer)
-                        if (length > 0) {
-                            // Traffic is dropped by simply doing nothing with the read data
-                        } else if (length < 0) {
-                            // Interface closed
-                            Thread.sleep(100)
-                        }
-                    } else {
-                        Thread.sleep(1000)
-                    }
-                } catch (e: InterruptedException) {
-                    break
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error in VPN read loop", e)
-                    try {
-                        Thread.sleep(500)
-                    } catch (ie: InterruptedException) {
-                        break
-                    }
-                }
-            }
-        }.apply { start() }
-    }
-
-    private fun stopVpn() {
-        isRunning.set(false)
-        vpnThread?.interrupt()
-        vpnThread = null
-        synchronized(this) {
+        synchronized(vpnLock) {
             try {
                 vpnInterface?.close()
             } catch (e: Exception) {
@@ -209,8 +181,16 @@ class NetCutVpnService : VpnService() {
         }
     }
 
+    override fun onRevoke() {
+        Log.d(TAG, "VPN permission revoked by system/user.")
+        AppUtils.setVpnActive(applicationContext, false)
+        shutdown()
+        stopSelf()
+        super.onRevoke()
+    }
+
     override fun onDestroy() {
-        stopVpn()
+        shutdown()
         serviceScope.cancel()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         super.onDestroy()

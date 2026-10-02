@@ -11,18 +11,25 @@ import kotlinx.coroutines.withContext
 
 class AppRepositoryImpl(private val context: Context) : AppRepository {
 
+    @Volatile
+    private var cachedApps: List<AppInfo>? = null
+
     override suspend fun getInstalledApps(includeSystemApps: Boolean): List<AppInfo> = withContext(Dispatchers.IO) {
+        val apps = cachedApps ?: fetchInstalledApps().also { cachedApps = it }
+        
+        if (includeSystemApps) {
+            apps
+        } else {
+            apps.filter { !it.isSystemApp }
+        }
+    }
+
+    private fun fetchInstalledApps(): List<AppInfo> {
         val packageManager = context.packageManager
         val installedApps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
         
-        installedApps.filter { appInfo ->
-            if (includeSystemApps) {
-                true
-            } else {
-                // Return apps that are not system apps, or updated system apps
-                (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0 || (appInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
-            }
-        }.map { appInfo ->
+        return installedApps.map { appInfo ->
+            val isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0 && (appInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0
             val category = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 appInfo.category
             } else {
@@ -32,7 +39,7 @@ class AppRepositoryImpl(private val context: Context) : AppRepository {
                 packageName = appInfo.packageName,
                 appName = packageManager.getApplicationLabel(appInfo).toString(),
                 icon = packageManager.getApplicationIcon(appInfo),
-                isSystemApp = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0,
+                isSystemApp = isSystem,
                 category = category
             )
         }.sortedBy { it.appName.lowercase() }
